@@ -57,64 +57,71 @@ before any timing.
 
 | Runtime | ns/op | vs MRI |
 | --- | ---: | ---: |
-| **go-ruby (pure Go)** | 4487.6 | 0.35× |
-| MRI | 12693.3 | 1.00× |
-| MRI + YJIT | 8216.7 | 0.65× |
-| JRuby | 7701.9 | 0.61× |
-| TruffleRuby | 5504.9 | 0.43× |
+| **go-ruby (pure Go)** | 4626.1 | 0.37× |
+| MRI | 12566.7 | 1.00× |
+| MRI + YJIT | 8436.7 | 0.67× |
+| JRuby | 7933.2 | 0.63× |
+| TruffleRuby | 5354.4 | 0.43× |
 
 #### read
 
 | Runtime | ns/op | vs MRI |
 | --- | ---: | ---: |
-| **go-ruby (pure Go)** | 5155.1 | 0.50× |
-| MRI | 10310.0 | 1.00× |
-| MRI + YJIT | 8340.0 | 0.81× |
-| JRuby | 3451.1 | 0.33× |
-| TruffleRuby | 6397.4 | 0.62× |
+| **go-ruby (pure Go)** | 5398.2 | 0.52× |
+| MRI | 10316.7 | 1.00× |
+| MRI + YJIT | 8083.3 | 0.78× |
+| JRuby | 3556.5 | 0.34× |
+| TruffleRuby | 6361.4 | 0.62× |
 
 #### getc
 
 | Runtime | ns/op | vs MRI |
 | --- | ---: | ---: |
-| **go-ruby (pure Go)** | 51875.1 | 0.11× |
-| MRI | 473253.3 | 1.00× |
-| MRI + YJIT | 404340.0 | 0.85× |
-| JRuby | 136266.0 | 0.29× |
-| TruffleRuby | 262840.4 | 0.56× |
+| **go-ruby (pure Go)** | 52114.2 | 0.11× |
+| MRI | 480433.3 | 1.00× |
+| MRI + YJIT | 409370.0 | 0.85× |
+| JRuby | 137189.3 | 0.29× |
+| TruffleRuby | 256808.1 | 0.53× |
 
 #### puts
 
 | Runtime | ns/op | vs MRI |
 | --- | ---: | ---: |
-| **go-ruby (pure Go)** | 12715.4 | 0.31× |
-| MRI | 41253.3 | 1.00× |
-| MRI + YJIT | 35060.0 | 0.85× |
-| JRuby | 26284.7 | 0.64× |
-| TruffleRuby | 16698.1 | 0.40× |
+| **go-ruby (pure Go)** | 12557.2 | 0.31× |
+| MRI | 41110.0 | 1.00× |
+| MRI + YJIT | 34836.7 | 0.85× |
+| JRuby | 26286.9 | 0.64× |
+| TruffleRuby | 16746.1 | 0.41× |
 
 #### gets
 
 | Runtime | ns/op | vs MRI |
 | --- | ---: | ---: |
-| **go-ruby (pure Go)** | 102233.2 | 5.80× |
-| MRI | 17620.0 | 1.00× |
-| MRI + YJIT | 17066.7 | 0.97× |
-| JRuby | 8284.9 | 0.47× |
-| TruffleRuby | 11813.1 | 0.67× |
+| **go-ruby (pure Go)** | 7344.6 | 0.42× |
+| MRI | 17603.3 | 1.00× |
+| MRI + YJIT | 17576.7 | 1.00× |
+| JRuby | 8138.5 | 0.46× |
+| TruffleRuby | 11783.3 | 0.67× |
 
-Mixed, and instructive. On the byte- and buffer-shuffling paths the pure-Go
-library **beats MRI's C extension**: `write` 0.35×, `puts` 0.31×, `read` 0.50×,
-and most strikingly `getc` **~9× faster** (0.11×) — MRI's per-character `getc`
-pays a full method-dispatch + object-allocation round trip in C, where the Go
-`EachChar` decode loop stays tight. The one **regression is `gets`/`each_line`
-(5.80× slower)**: the library's line core calls `strings.Index(string(rest), sep)`
-on the remaining buffer for every line, which reallocates and rescans a shrinking
-copy each iteration (≈ O(n²) over the line count), whereas MRI's `gets` is a single
-C `memchr` over the live buffer. That line-scan is the concrete optimization target
-for this module — indexing on the `[]byte` directly (no `string(rest)` copy) and
-advancing a saved offset removes both the allocation and the re-scan. Output stays
-byte-identical to MRI throughout.
+Across the board the pure-Go library now **beats MRI's C extension on every
+operation**: `write` 0.37×, `puts` 0.31×, `read` 0.52×, `gets` 0.42×, and most
+strikingly `getc` **~9× faster** (0.11×) — MRI's per-character `getc` pays a full
+method-dispatch + object-allocation round trip in C, where the Go `EachChar`
+decode loop stays tight. It is also faster than **MRI + YJIT** on every row,
+including `gets` (0.42× the YJIT column, ~2.4× faster).
+
+`gets`/`each_line` used to be the sole regression (**5.80× slower than MRI**): the
+line core called `strings.Index(string(rest), sep)` on the remaining buffer for
+every line, which reallocated and rescanned a shrinking copy each iteration
+(≈ O(n²) over the line count), whereas MRI's `gets` is a single C `memchr` over the
+live buffer. The scan now runs directly on the `[]byte` slice from the cursor —
+`bytes.IndexByte` for the common single-byte separator (the `$/` default `"\n"`)
+and `bytes.Index` for multi-byte / paragraph separators — with no `string(rest)`
+copy and no rescan of consumed bytes, so the whole line walk is linear. On this
+same host that took `gets` from **102233 ns/op → 7345 ns/op (~14× faster)**,
+turning a 5.80× loss into a 0.42× win over both MRI and YJIT. Output stays
+byte-identical to MRI throughout (the harness verifies the SHA-256 of every op
+before timing).
 
 !!! note "Reproduce"
     The harness is committed under
