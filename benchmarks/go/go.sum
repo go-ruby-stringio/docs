@@ -2,3 +2,5 @@ github.com/go-ruby-stringio/stringio v0.0.0-20260703152429-3cd4f5af33e9 h1:BUqVz
 github.com/go-ruby-stringio/stringio v0.0.0-20260703152429-3cd4f5af33e9/go.mod h1:X+WdqcNFxpWwOTku5BB1fefeDevRFVJ4tiXEpeRWtZk=
 github.com/go-ruby-stringio/stringio v0.0.0-20260717074730-69daeb97cdf3 h1:gPHFuxt7k2Q2SwWCKCsug3UyWRmrugxY/qSQ8ogXZ/s=
 github.com/go-ruby-stringio/stringio v0.0.0-20260717074730-69daeb97cdf3/go.mod h1:X+WdqcNFxpWwOTku5BB1fefeDevRFVJ4tiXEpeRWtZk=
+github.com/go-ruby-stringio/stringio v0.0.0-20260916103315-1e67ac196237 h1:7d9minN8dGxEZ3lsWZAWZQ5tiOsgPh8M7p3ci/gOt/0=
+github.com/go-ruby-stringio/stringio v0.0.0-20260916103315-1e67ac196237/go.mod h1:X+WdqcNFxpWwOTku5BB1fefeDevRFVJ4tiXEpeRWtZk=
