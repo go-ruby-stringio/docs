@@ -1,4 +1,9 @@
-# Why pure Go
+---
+title: "Why pure Go"
+weight: 20
+---
+
+# Why pure Go {#why-pure-go}
 
 `go-ruby-stringio/stringio` reimplements Ruby's StringIO in **pure Go, with cgo disabled**. The
 slice of Ruby it covers is **deterministic and interpreter-independent**: an
@@ -8,7 +13,7 @@ a seek-past-end write are all a pure function of their inputs, with no live
 binding and no evaluation of arbitrary Ruby. That is exactly the part that can —
 and should — live as a standalone Go library, separate from the interpreter.
 
-## Extracted from rbgo, reusable by anyone
+## Extracted from rbgo, reusable by anyone {#extracted-from-rbgo-reusable-by-anyone}
 
 This library began life inside [go-embedded-ruby](https://github.com/go-embedded-ruby/ruby)'s
 `rbgo`. It has been **made a reusable standalone library** so that:
@@ -26,7 +31,7 @@ or routing `Kernel#puts` through it — is the host's job; this library hands ba
 an idiomatic Go `StringIO` whose typed errors the host maps onto Ruby's exception
 classes.
 
-## Why pure Go matters here
+## Why pure Go matters here {#why-pure-go-matters-here}
 
 Because the library is CGO-free and dependency-free, it:
 
@@ -37,5 +42,5 @@ Because the library is CGO-free and dependency-free, it:
   `PATH`, while the cross-arch and Windows lanes (where `ruby` is absent) still
   validate the library itself.
 
-See [Usage & API](api.md) for the surface and [Roadmap](roadmap.md) for what is
+See [Usage & API]({{< relref "api.md" >}}) for the surface and [Roadmap]({{< relref "roadmap.md" >}}) for what is
 in scope.

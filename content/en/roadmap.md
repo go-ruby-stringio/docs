@@ -1,4 +1,9 @@
-# Roadmap
+---
+title: "Roadmap"
+weight: 40
+---
+
+# Roadmap {#roadmap}
 
 `go-ruby-stringio/stringio` is grown **test-first**, each capability differential-tested against MRI
 rather than built in isolation. Ruby's StringIO — the
@@ -14,7 +19,7 @@ deterministic, interpreter-independent in-memory IO — is
 | Content & state | `string` / `string=`, `truncate`, `size` / `length`, `eof?`, `close` / `closed?`, `flush`, `lineno` / `lineno=`, `ungetc` / `ungetbyte`. | **Done** |
 | Exact MRI raises & coverage | `IOError` on closed / wrong-mode streams, `EOFError` on `readline`/`readchar`/`readbyte` at EOF, `ArgumentError` on a negative `read`; a StringIO program corpus run by `ruby` reproduced byte-for-byte. 100% coverage, green across six arches and three OSes. | **Done** |
 
-## Documented out-of-scope boundaries
+## Documented out-of-scope boundaries {#documented-out-of-scope-boundaries}
 
 These are **deliberate**, recorded so the module's surface is unambiguous:
 
@@ -22,5 +27,5 @@ These are **deliberate**, recorded so the module's surface is unambiguous:
 - **Reference is reference Ruby (MRI).** Byte-for-byte conformance targets MRI's StringIO behaviour, pinned by the differential oracle.
 - **Standalone & reusable.** The module has no dependency on the Ruby runtime; the dependency runs the other way.
 
-See [Usage & API](api.md) for the surface and [Why pure Go](why.md) for the
+See [Usage & API]({{< relref "api.md" >}}) for the surface and [Why pure Go]({{< relref "why.md" >}}) for the
 deterministic/interpreter split.

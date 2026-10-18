@@ -1,18 +1,26 @@
-# Usage & API
+---
+title: "Usage & API"
+weight: 30
+---
+
+# Usage & API {#usage-api}
 
 The public API lives at the module root (`github.com/go-ruby-stringio/stringio`). It is **Ruby-shaped but Go-idiomatic**: every method maps to its Ruby StringIO counterpart, while the surface follows Go conventions — methods that Ruby implements as queries return a value, and the ones that can raise return a typed `error` a host maps onto Ruby's exception classes.
 
-!!! success "Status: implemented"
-    The library is built and importable as `github.com/go-ruby-stringio/stringio`, bound into
-    `rbgo` as a native module; see [Roadmap](roadmap.md).
+{{< callout type="info" >}}
+**Status: implemented**
 
-## Install
+The library is built and importable as `github.com/go-ruby-stringio/stringio`, bound into
+`rbgo` as a native module; see [Roadmap]({{< relref "roadmap.md" >}}).
+{{< /callout >}}
+
+## Install {#install}
 
 ```sh
 go get github.com/go-ruby-stringio/stringio
 ```
 
-## Worked example
+## Worked example {#worked-example}
 
 ```go
 // Write into an in-memory buffer.
@@ -38,7 +46,7 @@ g.Write("z")
 fmt.Printf("%q\n", g.String()) // "abc\x00\x00\x00z"
 ```
 
-## Shape
+## Shape {#shape}
 
 A `StringIO` is constructed with `New(s, mode)` or `NewString(s)` (the read-write
 default).
@@ -91,7 +99,7 @@ func (s *StringIO) Lineno() int
 func (s *StringIO) SetLineno(n int)
 ```
 
-### Errors
+### Errors {#errors}
 
 The typed errors below model the exceptions MRI's StringIO raises; a host maps
 each onto its Ruby counterpart when binding the type into an interpreter.
@@ -105,7 +113,7 @@ each onto its Ruby counterpart when binding the type into an interpreter.
 | `ErrNegativeLength` | `ArgumentError`, "negative length"      |
 | `ErrInvalidSeek`    | `Errno::EINVAL`, "Invalid argument"     |
 
-## MRI conformance
+## MRI conformance {#mri-conformance}
 
 Correctness is defined by reference Ruby. A **differential oracle** runs a corpus
 of StringIO programs through both the system `ruby` and this library and asserts
@@ -114,7 +122,7 @@ binmode stdin) so Windows text-mode never rewrites the bytes, gate themselves on
 `RUBY_VERSION >= "4.0"`, and skip where `ruby` is absent — so the cross-arch and
 Windows lanes still validate the library.
 
-## Relationship to Ruby
+## Relationship to Ruby {#relationship-to-ruby}
 
 `go-ruby-stringio/stringio` is **standalone and reusable**, and is the backend bound
 into [go-embedded-ruby](https://github.com/go-embedded-ruby/ruby) by `rbgo` as a

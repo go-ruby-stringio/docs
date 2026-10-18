@@ -1,11 +1,16 @@
-# Performance
+---
+title: "Performance"
+weight: 50
+---
+
+# Performance {#performance}
 
 `go-ruby-stringio/stringio` is the pure-Go library that
 [`rbgo`](https://github.com/go-embedded-ruby/ruby) binds for Ruby's StringIO. This
 page records a **comparative benchmark** of that module against the reference
 Ruby runtimes, part of the ecosystem-wide per-module parity suite.
 
-## What is measured
+## What is measured {#what-is-measured}
 
 The **same** workload — a set of representative StringIO usage patterns (streaming
 `write` + `string`, line iteration with `gets`/`each_line`, byte-chunk `read`
@@ -27,14 +32,17 @@ mismatch.
 - **Runtimes:** `ruby` (MRI, the oracle) and `ruby --yjit`; `jruby` (on the JVM);
   `truffleruby` (GraalVM CE Native).
 
-!!! note "rbgo end-to-end row"
-    The whole-interpreter `rbgo`-vs-MRI row (single-shot `ruby file.rb` wall time,
-    the format used by the other module pages) has not yet been captured for
-    StringIO on a controlled host, so it is not shown here rather than printed as
-    a fabricated figure. The library-level section below is the real, measured
-    parity result for this module.
+{{< callout type="info" >}}
+**rbgo end-to-end row**
 
-## Library-level benchmark (Go API vs runtimes) — 2026-07-03
+The whole-interpreter `rbgo`-vs-MRI row (single-shot `ruby file.rb` wall time,
+the format used by the other module pages) has not yet been captured for
+StringIO on a controlled host, so it is not shown here rather than printed as
+a fabricated figure. The library-level section below is the real, measured
+parity result for this module.
+{{< /callout >}}
+
+## Library-level benchmark (Go API vs runtimes) — 2026-07-03 {#library-level-benchmark-go-api-vs-runtimes-2026-07-03}
 
 This section measures the **pure-Go library directly, through its Go API** — not
 the `rbgo` interpreter path. It isolates the library primitive from
@@ -53,7 +61,7 @@ before any timing.
 - **Method:** 3 untimed warm-up passes, then 25 timed passes of a fixed inner
   loop, monotonic clock, **best** pass reported as **ns/op**.
 
-#### write
+#### write {#write}
 
 | Runtime | ns/op | vs MRI |
 | --- | ---: | ---: |
@@ -63,7 +71,7 @@ before any timing.
 | JRuby | 7933.2 | 0.63× |
 | TruffleRuby | 5354.4 | 0.43× |
 
-#### read
+#### read {#read}
 
 | Runtime | ns/op | vs MRI |
 | --- | ---: | ---: |
@@ -73,7 +81,7 @@ before any timing.
 | JRuby | 3556.5 | 0.34× |
 | TruffleRuby | 6361.4 | 0.62× |
 
-#### getc
+#### getc {#getc}
 
 | Runtime | ns/op | vs MRI |
 | --- | ---: | ---: |
@@ -83,7 +91,7 @@ before any timing.
 | JRuby | 137189.3 | 0.29× |
 | TruffleRuby | 256808.1 | 0.53× |
 
-#### puts
+#### puts {#puts}
 
 | Runtime | ns/op | vs MRI |
 | --- | ---: | ---: |
@@ -93,7 +101,7 @@ before any timing.
 | JRuby | 26286.9 | 0.64× |
 | TruffleRuby | 16746.1 | 0.41× |
 
-#### gets
+#### gets {#gets}
 
 | Runtime | ns/op | vs MRI |
 | --- | ---: | ---: |
@@ -123,23 +131,29 @@ turning a 5.80× loss into a 0.42× win over both MRI and YJIT. Output stays
 byte-identical to MRI throughout (the harness verifies the SHA-256 of every op
 before timing).
 
-!!! note "Reproduce"
-    The harness is committed under
-    [`benchmarks/`](https://github.com/go-ruby-stringio/docs/tree/main/benchmarks):
-    a self-contained Go driver (`go/`, pins the published library by
-    pseudo-version in `go.mod`, no `replace`), the equivalent `ruby/stringio.rb`
-    workload, and `run.sh`. Run `bash benchmarks/run.sh`; it first verifies the Go
-    output is byte-identical to MRI (SHA-256 per op) and aborts on mismatch, then
-    times. Env `OUTER`/`WARM` tune the pass budget and `RUBY`/`JRUBY`/`TRUFFLERUBY`
-    select the runtime binaries.
+{{< callout type="info" >}}
+**Reproduce**
 
-!!! warning "Warm-up budget & noise — honest framing"
-    Numbers reflect a **fixed warm-process budget** (3 warm-up + 25 timed passes
-    in one process). The JVM/GraalVM JITs (JRuby, TruffleRuby) may need a larger
-    warm-up to reach steady state, so their columns can **understate** peak
-    throughput. Sub-microsecond-per-op work is not reached here (the smallest op,
-    `write`, is ~4.5 µs), so per-row relative noise is modest, but treat
-    differences under ~10% as noise. Every number here is a **real measured value**
-    from the dated run above — nothing is fabricated, estimated, or cherry-picked.
-    The go-ruby column is the pure-Go library; every other column is that
-    interpreter's own `StringIO` (a C extension in MRI) doing the equivalent work.
+The harness is committed under
+[`benchmarks/`](https://github.com/go-ruby-stringio/docs/tree/main/benchmarks):
+a self-contained Go driver (`go/`, pins the published library by
+pseudo-version in `go.mod`, no `replace`), the equivalent `ruby/stringio.rb`
+workload, and `run.sh`. Run `bash benchmarks/run.sh`; it first verifies the Go
+output is byte-identical to MRI (SHA-256 per op) and aborts on mismatch, then
+times. Env `OUTER`/`WARM` tune the pass budget and `RUBY`/`JRUBY`/`TRUFFLERUBY`
+select the runtime binaries.
+{{< /callout >}}
+
+{{< callout type="warning" >}}
+**Warm-up budget & noise — honest framing**
+
+Numbers reflect a **fixed warm-process budget** (3 warm-up + 25 timed passes
+in one process). The JVM/GraalVM JITs (JRuby, TruffleRuby) may need a larger
+warm-up to reach steady state, so their columns can **understate** peak
+throughput. Sub-microsecond-per-op work is not reached here (the smallest op,
+`write`, is ~4.5 µs), so per-row relative noise is modest, but treat
+differences under ~10% as noise. Every number here is a **real measured value**
+from the dated run above — nothing is fabricated, estimated, or cherry-picked.
+The go-ruby column is the pure-Go library; every other column is that
+interpreter's own `StringIO` (a C extension in MRI) doing the equivalent work.
+{{< /callout >}}
